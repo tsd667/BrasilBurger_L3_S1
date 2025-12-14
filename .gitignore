@@ -1,0 +1,21 @@
+# Fichiers de configuration avec mots de passe
+config.properties
+
+# Mais créer un fichier exemple
+!config.properties.example
+
+# Fichiers IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Fichiers compilés
+target/
+*.class
+out/target/
+*.jar
+*.class
+*.zip
