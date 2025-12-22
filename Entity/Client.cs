@@ -9,7 +9,6 @@ namespace BrasilBurger.Web.Entity
         public string? Type { get; set; }
         public string? Telephone { get; set; }
         
-        // Pour l'authentification
         public string? Email { get; set; }
         public string? MotDePasse { get; set; }
 

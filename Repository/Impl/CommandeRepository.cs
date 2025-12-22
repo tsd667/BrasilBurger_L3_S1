@@ -19,21 +19,18 @@ namespace BrasilBurger.Web.Repository.Impl
             
             try
             {
-                // 1. Créer la commande
                 _context.Commandes.Add(commande);
                 await _context.SaveChangesAsync();
                 
                 int commandeId = commande.Id;
                 Console.WriteLine($"✅ Commande créée avec l'ID : {commandeId}");
                 
-                // 2. Créer les lignes commande_burger
                 foreach (var cb in commande.CommandeBurgers)
                 {
                     cb.IdCommande = commandeId;
                     _context.CommandeBurgers.Add(cb);
                 }
                 
-                // 3. Créer les lignes commande_menu
                 foreach (var cm in commande.CommandeMenus)
                 {
                     cm.IdCommande = commandeId;
@@ -60,7 +57,6 @@ namespace BrasilBurger.Web.Repository.Impl
                 .OrderByDescending(c => c.Date)
                 .ToListAsync();
             
-            // Charger les détails
             foreach (var cmd in commandes)
             {
                 cmd.CommandeBurgers = await _context.CommandeBurgers

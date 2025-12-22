@@ -9,7 +9,6 @@ namespace BrasilBurger.Web.Entity
         public string LieuConsommation { get; set; }
         public double? FraisLivraison { get; set; }
         
-        // Relations
         public int IdClient { get; set; }
         public Client? Client { get; set; }
         
@@ -23,7 +22,6 @@ namespace BrasilBurger.Web.Entity
 
         public Commande()
         {
-            // ✅ Utilisation de UtcNow pour PostgreSQL
             Date = DateTime.UtcNow;
             EtatCmd = "NonTraiter";
             CommandeBurgers = new List<CommandeBurger>();
@@ -36,7 +34,6 @@ namespace BrasilBurger.Web.Entity
         }
     }
     
-    // Les classes CommandeBurger et CommandeMenu restent identiques
     public class CommandeBurger
     {
         public int Id { get; set; }

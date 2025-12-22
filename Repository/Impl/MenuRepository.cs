@@ -24,7 +24,6 @@ namespace BrasilBurger.Web.Repository.Impl
 
                 int menuId = menu.Id;
 
-                // Association burger
                 if (menu.Burger != null)
                 {
                     await _context.Database.ExecuteSqlRawAsync(
@@ -33,7 +32,6 @@ namespace BrasilBurger.Web.Repository.Impl
                     );
                 }
 
-                // Association compléments
                 if (menu.Complements != null && menu.Complements.Any())
                 {
                     foreach (var complement in menu.Complements)
@@ -83,12 +81,11 @@ namespace BrasilBurger.Web.Repository.Impl
 
         public async Task<List<Menu>> ListerParEtatAsync(string etat)
         {
-            // Convert string to enum C# (ignore case)
             if (!Enum.TryParse<EtatStockEnum>(etat, true, out var etatEnum))
                 return new List<Menu>();
 
             var menus = await _context.Menus
-                .Where(m => m.EtatStock == etatEnum)  // comparer enum avec enum
+                .Where(m => m.EtatStock == etatEnum) 
                 .OrderBy(m => m.Id)
                 .ToListAsync();
 

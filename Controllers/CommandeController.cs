@@ -25,7 +25,6 @@ namespace BrasilBurger.Web.Controllers
             _complementService = complementService;
         }
 
-        // POST: /Commande/AjouterBurger
         [HttpPost]
         public async Task<IActionResult> AjouterBurger(int id, int quantite = 1, List<int>? complementIds = null)
         {
@@ -45,7 +44,6 @@ namespace BrasilBurger.Web.Controllers
                 UrlImage = burger.UrlImage
             };
 
-            // Ajouter les compléments si sélectionnés
             if (complementIds != null && complementIds.Any())
             {
                 foreach (var complementId in complementIds)
@@ -65,7 +63,6 @@ namespace BrasilBurger.Web.Controllers
             return RedirectToAction("DetailsBurger", "Catalogue", new { id });
         }
 
-        // POST: /Commande/AjouterMenu
         [HttpPost]
         public async Task<IActionResult> AjouterMenu(int id, int quantite = 1)
         {
@@ -91,7 +88,6 @@ namespace BrasilBurger.Web.Controllers
             return RedirectToAction("DetailsMenu", "Catalogue", new { id });
         }
 
-        // GET: /Commande/Panier
         public IActionResult Panier()
         {
             var items = PanierHelper.GetPanier(HttpContext.Session);
@@ -104,7 +100,6 @@ namespace BrasilBurger.Web.Controllers
             return View(viewModel);
         }
 
-        // POST: /Commande/RetirerItem
         [HttpPost]
         public IActionResult RetirerItem(int id, string type)
         {
@@ -113,10 +108,8 @@ namespace BrasilBurger.Web.Controllers
             return RedirectToAction("Panier");
         }
 
-        // GET: /Commande/Valider
         public IActionResult Valider()
         {
-            // Vérifier si connecté
             var clientId = HttpContext.Session.GetInt32("ClientId");
             if (!clientId.HasValue)
             {
@@ -139,7 +132,6 @@ namespace BrasilBurger.Web.Controllers
             return View(viewModel);
         }
 
-        // POST: /Commande/Confirmer
         [HttpPost]
         public async Task<IActionResult> Confirmer(ValiderCommandeViewModel model)
         {
@@ -155,7 +147,6 @@ namespace BrasilBurger.Web.Controllers
                 return RedirectToAction("Index", "Catalogue");
             }
 
-            // Créer la commande
             var commande = new Commande
             {
                 IdClient = clientId.Value,
@@ -165,7 +156,6 @@ namespace BrasilBurger.Web.Controllers
                 MontantTotal = items.Sum(i => i.Total)
             };
 
-            // Ajouter les lignes de commande
             foreach (var item in items)
             {
                 if (item.Type == "burger")
@@ -190,14 +180,12 @@ namespace BrasilBurger.Web.Controllers
 
             var commandeCreee = await _commandeService.CreerCommandeAsync(commande);
 
-            // Vider le panier
             PanierHelper.ViderPanier(HttpContext.Session);
 
             TempData["SuccessMessage"] = "Commande créée avec succès !";
             return RedirectToAction("Paiement", new { id = commandeCreee.Id });
         }
 
-        // GET: /Commande/Paiement/5
         public async Task<IActionResult> Paiement(int id)
         {
             var commande = await _commandeService.TrouverCommandeParIdAsync(id);
@@ -215,7 +203,6 @@ namespace BrasilBurger.Web.Controllers
             return View(viewModel);
         }
 
-        // GET: /Commande/MesCommandes
         public async Task<IActionResult> MesCommandes()
         {
             var clientId = HttpContext.Session.GetInt32("ClientId");
