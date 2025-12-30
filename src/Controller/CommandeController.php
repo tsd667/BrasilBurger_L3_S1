@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Commande;
@@ -48,9 +49,18 @@ class CommandeController extends AbstractController
         ]);
     }
 
+    /**
+     * ✅ NOUVEAU : Validation livreur avant de terminer une commande en livraison
+     */
     #[Route('/{id}/terminer', name: 'commande_terminer', methods: ['POST'])]
     public function terminer(Commande $commande, CommandeRepository $repo): Response
     {
+        // ✅ VALIDATION : Si c'est une livraison, vérifier qu'un livreur est affecté
+        if ($commande->getLieuConsommation() === 'Livraison' && !$commande->getIdLivreur()) {
+            $this->addFlash('error', 'Impossible de terminer : Vous devez d\'abord affecter un livreur à cette commande.');
+            return $this->redirectToRoute('commande_show', ['id' => $commande->getId()]);
+        }
+        
         $repo->terminerCommande($commande->getId());
         $this->addFlash('success', 'Commande marquée comme terminée');
         return $this->redirectToRoute('commande_index');
