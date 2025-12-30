@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     intl \
     pdo \
     pdo_mysql \
+    pdo_pgsql \
+    pgsql \
     zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
