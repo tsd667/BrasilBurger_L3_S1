@@ -23,6 +23,13 @@
                     <p><strong>Adresse:</strong> {{ commande.client.adresse ?? 'N/A' }}</p>
                     <p><strong>Zone:</strong> Zone {{ commande.idZone }}</p>
                     <p><strong>Frais livraison:</strong> {{ commande.fraisLivraison|number_format(0, ',', ' ') }} FCFA</p>
+                    <p><strong>Livreur:</strong> 
+                        {% if commande.livreur %}
+                            <span class="badge bg-success">{{ commande.livreur.nomComplet }}</span>
+                        {% else %}
+                            <span class="badge bg-warning">Non affecté</span>
+                        {% endif %}
+                    </p>
                 {% endif %}
                 <p><strong>État:</strong> 
                     <span class="badge bg-{{ commande.etatCmd == 'Terminer' ? 'success' : (commande.etatCmd == 'Annuler' ? 'danger' : 'warning') }}">
@@ -70,16 +77,37 @@
     </div>
 </div>
 
+{# ✅ NOUVELLE ALERTE : Si livraison sans livreur #}
+{% if commande.etatCmd == 'NonTraiter' and commande.lieuConsommation == 'Livraison' and not commande.idLivreur %}
+    <div class="alert alert-warning">
+        <h5><i class="fas fa-exclamation-triangle"></i> Action requise</h5>
+        <p>Cette commande est en livraison mais <strong>aucun livreur n'est affecté</strong>.</p>
+        <p>Vous devez affecter un livreur avant de pouvoir terminer cette commande.</p>
+        <a href="{{ path('livraison_zones') }}" class="btn btn-warning">
+            <i class="fas fa-truck"></i> Affecter un livreur maintenant
+        </a>
+    </div>
+{% endif %}
+
 <div class="mt-3">
     <a href="{{ path('commande_index') }}" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Retour
     </a>
+    
     {% if commande.etatCmd == 'NonTraiter' %}
-        <form method="post" action="{{ path('commande_terminer', {id: commande.id}) }}" style="display:inline;">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-check"></i> Marquer comme Terminé
+        {# ✅ VALIDATION : Désactiver le bouton Terminer si livraison sans livreur #}
+        {% if commande.lieuConsommation == 'Livraison' and not commande.idLivreur %}
+            <button type="button" class="btn btn-success" disabled title="Affectez d'abord un livreur">
+                <i class="fas fa-check"></i> Marquer comme Terminé (Livreur requis)
             </button>
-        </form>
+        {% else %}
+            <form method="post" action="{{ path('commande_terminer', {id: commande.id}) }}" style="display:inline;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Marquer comme Terminé
+                </button>
+            </form>
+        {% endif %}
+        
         <form method="post" action="{{ path('commande_annuler', {id: commande.id}) }}" style="display:inline;" 
               onsubmit="return confirm('Annuler cette commande ?');">
             <button type="submit" class="btn btn-danger">
