@@ -1,0 +1,151 @@
+{% extends 'base.html.twig' %}
+{% block title %}Zone {{ zoneId }} - Détails{% endblock %}
+{% block body %}
+<h1 class="mb-4"><i class="fas fa-map-marker-alt"></i> Zone {{ zoneId }} - Commandes en Livraison</h1>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="alert alert-info">
+            <strong><i class="fas fa-info-circle"></i> Quartiers couverts :</strong>
+            {% if quartiers is not empty %}
+                {{ quartiers|map(q => q.nom)|join(', ') }}
+            {% else %}
+                Non disponibles
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h2>{{ commandes|length }}</h2>
+                <p class="mb-0">Commande(s) à affecter</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if commandes is not empty %}
+<form method="post" action="{{ path('livraison_affecter_multiple') }}" id="form-affectation">
+    <input type="hidden" name="zone_id" value="{{ zoneId }}">
+    
+    <div class="card mb-3">
+        <div class="card-header bg-danger text-white">
+            <h5><i class="fas fa-user"></i> Affecter un Livreur</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label"><strong>Sélectionner un livreur :</strong></label>
+                    <select name="livreur_id" class="form-select" required>
+                        <option value="">Choisir un livreur...</option>
+                        {% for livreur in livreurs %}
+                            {# Mise à jour ici : livreur.id correspond à la clé définie dans le Controller #}
+                            <option value="{{ livreur.id }}">
+                                {{ livreur.prenom }} {{ livreur.nom }} 
+                                {% if livreur.commandesEnCours > 0 %}
+                                    ({{ livreur.commandesEnCours }} en cours)
+                                {% else %}
+                                    ✓ Disponible
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-secondary w-100" onclick="selectAll()">
+                        <i class="fas fa-check-square"></i> Tout sélectionner
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-paper-plane"></i> Affecter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-danger">
+                <tr>
+                    <th width="50">
+                        <input type="checkbox" id="select-all" onchange="toggleAll(this)">
+                    </th>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Adresse</th>
+                    <th>Téléphone</th>
+                    <th>Montant</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for commande in commandes %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="commande_ids[]" value="{{ commande.id }}" class="commande-checkbox">
+                        </td>
+                        <td>{{ commande.id }}</td>
+                        <td>{{ commande.date|date('d/m H:i') }}</td>
+                        <td>{{ commande.client ? commande.client.nomComplet : 'N/A' }}</td>
+                        <td>{{ commande.client ? commande.client.adresse : 'N/A' }}</td>
+                        <td>{{ commande.client ? commande.client.telephone : 'N/A' }}</td>
+                        <td>{{ commande.montantTotal|number_format(0, ',', ' ') }} F</td>
+                        <td>
+                            <a href="{{ path('commande_show', {id: commande.id}) }}" class="btn btn-sm btn-info" target="_blank">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+{% else %}
+<div class="alert alert-success">
+    <h4><i class="fas fa-check-circle"></i> Aucune commande en attente</h4>
+    <p class="mb-0">Toutes les commandes de cette zone ont été affectées ou traitées.</p>
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{{ path('livraison_zones') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour aux zones
+    </a>
+</div>
+
+<script>
+function toggleAll(checkbox) {
+    document.querySelectorAll('.commande-checkbox').forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+}
+
+function selectAll() {
+    document.getElementById('select-all').checked = true;
+    toggleAll(document.getElementById('select-all'));
+}
+
+document.getElementById('form-affectation').addEventListener('submit', function(e) {
+    const livreur = document.querySelector('select[name="livreur_id"]').value;
+    const commandes = document.querySelectorAll('.commande-checkbox:checked');
+    
+    if (!livreur) {
+        e.preventDefault();
+        alert('Veuillez sélectionner un livreur');
+        return false;
+    }
+    
+    if (commandes.length === 0) {
+        e.preventDefault();
+        alert('Veuillez sélectionner au moins une commande');
+        return false;
+    }
+    
+    return confirm(`Affecter ${commandes.length} commande(s) au livreur sélectionné ?`);
+});
+</script>
+{% endblock %}
